@@ -10,12 +10,22 @@ class Radar {
     constructor() {
 
         // Setup map
-        this.map = L.map("map", { attributionControl: false, fadeAnimation: false, zoomControl: false }).setView([37.8, -96], 4);
+        this.map = L.map("map", {
+            attributionControl: false,
+            fadeAnimation: false, 
+            maxBounds: [
+                [-90, -180],
+                [90, 180]
+            ],
+            maxBoundsViscosity: 1.0,
+            zoomControl: false
+        }).setView([37.8, -96], 5);
+
         L.control.attribution({ prefix: false }).addTo(this.map)
         L.tileLayer(
             "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}",
             {
-                minZoom: 0,
+                minZoom: 2,
                 maxZoom: 10,
                 attribution: `&copy; <a href = "https://www.stadiamaps.com/" target = "_blank">Stadia Maps</a>, <a href = "https://openmaptiles.org/" target = "_blank">OpenMapTiles</a>, <a href = "https://www.openstreetmap.org/copyright" target = "_blank">OSM</a>`,
                 ext: "png"
@@ -28,6 +38,7 @@ class Radar {
         // Setup NOAA map options
         this.noaa_url = "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows?";
         this.noaa_opts = {
+            minZoom: 2,
             maxZoom: 10,
             opacity: 0,
             layers: "conus_bref_qcd",

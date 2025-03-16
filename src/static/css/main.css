@@ -90,6 +90,9 @@ a {
 a:hover {
     text-decoration: none !important;
 }
+.leaflet-container {
+    background: #222323 !important;
+}
 
 /* Style attribution */
 .leaflet-control-attribution {

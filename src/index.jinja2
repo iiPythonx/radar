@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang = "en">
+    <head>
+        <meta charset = "utf-8">
+        <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
+        <meta name = "theme-color" content = "#000">
+        <meta property = "og:title" content = "NOAA Weather Radar">
+        <meta property = "og:description" content = "Yuh, cool colors.">
+        <meta name = "darkreader-lock">
+
+        <!-- CSS -->
+        <link rel = "stylesheet" type = "text/css" href = "/css/main.css">
+        <link rel = "stylesheet" type = "text/css" href = "/css/leaflet.css">
+
+        <link href = "/favicon.avif" rel = "icon" type = "image/avif">
+
+        <title>iiPython Radar</title>
+    </head>
+    <body>
+        <section>
+            <div>
+                <button id = "back">-</button>
+                <div class = "step-time">
+                    <span>00:00:00</span>
+                    <span>00/00/00 ???</span>
+                </div>
+                <button id = "next">+</button>
+            </div>
+            <div>
+                <button id = "play"><span>▶</span></button>
+                <button id = "pause"><span>⏸</span></button>
+            </div>
+            <progress min = "1" max = "20" value = "20"></progress>
+        </section>
+        <main id = "map"></main>
+        <footer>
+            <div>
+                <span><a href = "https://github.com/iiPythonx/radar/commit/{{ git_hash }}">{{ git_hash[:7] }}</a></span>
+                <span id = "copyright">Copyright (c) 2025 <a href = "https://iipython.dev">Benjamin O'Brien</a></span>
+                <span id = "time"></span>
+            </div>
+        </footer>
+
+        <!-- JS -->
+        <script src = "/js/leaflet.js"></script>
+        <script src = "/js/main.js" async defer></script>
+    </body>
+</html>
