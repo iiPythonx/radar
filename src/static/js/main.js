@@ -41,7 +41,7 @@ class Radar {
 
        // Make initial radar request
        this.fetch();
-       setInterval(() => this.fetch(), 300);  // And autoupdate every 5 minutes
+       setInterval(() => this.fetch(), 5 * 60 * 1000);  // And autoupdate every 5 minutes
 
         // Handle time/date controls
         this.tzformat = new Intl.DateTimeFormat("en-US", {
