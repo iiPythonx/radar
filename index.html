@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang = "en">
+    <head>
+        <link rel = "stylesheet" type = "text/css" href = "/css/main.css">
+        <link rel = "stylesheet" type = "text/css" href = "/css/leaflet.css">
+    </head>
+    <body>
+        <section>
+            <div>
+                <button id = "back">-</button>
+                <div class = "step-time">
+                    <span>00:00:00</span>
+                    <span>03/15/25 CST</span>
+                </div>
+                <button id = "next">+</button>
+            </div>
+            <progress min = "1" max = "20" value = "20"></progress>
+        </section>
+        <main id = "map"></main>
+        <footer>
+            <div>
+                <span>:3</span>
+                <span id = "copyright">Copyright (c) 2025 <a href = "https://iipython.dev">Benjamin O'Brien</a></span>
+                <span id = "time"></span>
+            </div>
+        </footer>
+
+        <!-- JS -->
+        <script src = "/js/leaflet.js"></script>
+        <script src = "/js/main.js" async defer></script>
+    </body>
+</html>
