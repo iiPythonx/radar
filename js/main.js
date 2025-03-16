@@ -9,19 +9,30 @@ setInterval(() => {
 const map = L.map("map", { attributionControl: false, fadeAnimation: false, zoomControl: false }).setView([37.8, -96], 4);
 L.control.attribution({ prefix: false }).addTo(map)
 
-// Setup OSM map
-L.tileLayer("https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", { maxZoom: 18 }).addTo(map);
+// Setup stadia base map
+L.tileLayer(
+    // "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}",
+    "http://localhost:8001/tiles/{z}/{x}/{y}{r}.{ext}",
+    {
+        minZoom: 0,
+        maxZoom: 10,
+        attribution: `&copy; <a href = "https://www.stadiamaps.com/" target = "_blank">Stadia Maps</a>, <a href = "https://openmaptiles.org/" target = "_blank">OpenMapTiles</a>, <a href = "https://www.openstreetmap.org/copyright" target = "_blank">OSM</a>`,
+        ext: "png"
+    }
+).addTo(map);
 
 // Setup NOAA radar
 const noaa = L.tileLayer.wms(
     "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows?",
     {
+        maxZoom: 10,
+        opacity: 0.5,
         layers: "conus_bref_qcd",
         format: "image/png",
         transparent: true,
         version: "1.1.1",
         crs: L.CRS.EPSG3857,
-        attribution: `&copy; <a href = "https://www.noaa.gov/">NOAA</a>, <a href = "https://www.weather.gov/">NWS</a>`
+        attribution: `&copy; <a href = "https://www.noaa.gov/" target = "_blank">NOAA</a>, <a href = "https://www.weather.gov/" target = "_blank">NWS</a>`
     }
 ).addTo(map);
 
