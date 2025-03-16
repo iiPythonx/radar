@@ -5,43 +5,45 @@ setInterval(() => {
     document.getElementById("time").innerText = (new Date()).toUTCString();
 }, 100);
 
-// Handle map
-const map = L.map("map", { attributionControl: false, fadeAnimation: false, zoomControl: false }).setView([37.8, -96], 4);
-L.control.attribution({ prefix: false }).addTo(map)
-
-// Setup stadia base map
-L.tileLayer(
-    // "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}",
-    "http://localhost:8001/tiles/{z}/{x}/{y}{r}.{ext}",
-    {
-        minZoom: 0,
-        maxZoom: 10,
-        attribution: `&copy; <a href = "https://www.stadiamaps.com/" target = "_blank">Stadia Maps</a>, <a href = "https://openmaptiles.org/" target = "_blank">OpenMapTiles</a>, <a href = "https://www.openstreetmap.org/copyright" target = "_blank">OSM</a>`,
-        ext: "png"
-    }
-).addTo(map);
-
-// Setup NOAA radar
-const noaa = L.tileLayer.wms(
-    "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows?",
-    {
-        maxZoom: 10,
-        opacity: 0.5,
-        layers: "conus_bref_qcd",
-        format: "image/png",
-        transparent: true,
-        version: "1.1.1",
-        crs: L.CRS.EPSG3857,
-        attribution: `&copy; <a href = "https://www.noaa.gov/" target = "_blank">NOAA</a>, <a href = "https://www.weather.gov/" target = "_blank">NWS</a>`
-    }
-).addTo(map);
-
 // Make request for capabilities
-class Stepper {
+class Radar {
     constructor() {
-        this.fetch();
-        this.index = 19;
 
+        // Setup map
+        this.map = L.map("map", { attributionControl: false, fadeAnimation: false, zoomControl: false }).setView([37.8, -96], 4);
+        L.control.attribution({ prefix: false }).addTo(this.map)
+        L.tileLayer(
+            // "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}",
+            "http://localhost:8001/tiles/{z}/{x}/{y}{r}.{ext}",
+            {
+                minZoom: 0,
+                maxZoom: 10,
+                attribution: `&copy; <a href = "https://www.stadiamaps.com/" target = "_blank">Stadia Maps</a>, <a href = "https://openmaptiles.org/" target = "_blank">OpenMapTiles</a>, <a href = "https://www.openstreetmap.org/copyright" target = "_blank">OSM</a>`,
+                ext: "png"
+            }
+        ).addTo(this.map);
+
+        // Set initial index, 19 = end (.length = 20) since I'm avoiding .at()
+        this.index = 19;
+        
+        // Setup NOAA map options
+        this.noaa_url = "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows?";
+        this.noaa_opts = {
+            maxZoom: 10,
+            opacity: 0,
+            layers: "conus_bref_qcd",
+            format: "image/png",
+            transparent: true,
+            version: "1.1.1",
+            crs: L.CRS.EPSG3857,
+            attribution: `&copy; <a href = "https://www.noaa.gov/" target = "_blank">NOAA</a>, <a href = "https://www.weather.gov/" target = "_blank">NWS</a>`
+        }
+
+       // Make initial radar request
+       this.fetch();
+       setInterval(() => this.fetch(), 300);  // And autoupdate every 5 minutes
+
+        // Handle time/date controls
         this.tzformat = new Intl.DateTimeFormat("en-US", {
             timeZoneName: "short",
             year: "2-digit", month: "2-digit", day: "2-digit"
@@ -59,15 +61,30 @@ class Stepper {
         this.time.innerText = obj.toLocaleTimeString([], { hour12: false })
         this.date.innerText = `${this.tzformat.format(obj)}`;
         document.querySelector("progress").value = this.index + 1;
-        noaa.setParams({ time: this.times[this.index] });
+
+        // Show current layer
+        for (const layer of this.layers) layer.setOpacity(0);
+        this.layers[this.index].setOpacity(.5);
     }
 
     async fetch() {
         const response = await fetch("https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows?service=wms&version=1.1.1&request=GetCapabilities");
         const xml = (new DOMParser()).parseFromString(await response.text(), "application/xml");
         this.times = xml.querySelector("Extent").innerHTML.split(",").slice(-20);
+
+        // Construct layers
+        for (const layer of this.layers ?? []) this.map.removeLayer(layer);
+
+        this.layers = [];
+        for (const time of this.times) {
+            const layer = L.tileLayer.wms(this.noaa_url, this.noaa_opts);
+            layer.setParams({ time });
+            this.map.addLayer(layer);
+            this.layers.push(layer);
+        }
+
         this.update();
     }
 }
 
-(new Stepper());
+(new Radar());
