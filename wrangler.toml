@@ -1,0 +1,6 @@
+name = "iipython-radar"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-03-04"
+
+[env.production.vars]
+UNSTABLE_PRE_BUILD = "pip install lxml beautifulsoup4 nova-framework"

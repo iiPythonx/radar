@@ -48,6 +48,7 @@ section > div {
     gap: 5px;
 }
 section div {
+    width: 100%;
     display: flex;
 }
 section .step-time {
@@ -70,6 +71,16 @@ progress {
 progress::-moz-progress-bar { background: gray; }
 progress::-webkit-progress-bar { background-color: darkgray; }
 progress::-webkit-progress-value { background: gray; }
+
+#play, #pause {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+button > span {
+    display: block;
+    height: fit-content;
+}
 
 /* Leaflet overrides */
 a {

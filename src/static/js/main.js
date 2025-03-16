@@ -13,8 +13,7 @@ class Radar {
         this.map = L.map("map", { attributionControl: false, fadeAnimation: false, zoomControl: false }).setView([37.8, -96], 4);
         L.control.attribution({ prefix: false }).addTo(this.map)
         L.tileLayer(
-            // "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}",
-            "http://localhost:8001/tiles/{z}/{x}/{y}{r}.{ext}",
+            "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}",
             {
                 minZoom: 0,
                 maxZoom: 10,
@@ -52,8 +51,25 @@ class Radar {
         this.time = document.querySelector(".step-time span:first-child");
         this.date = document.querySelector(".step-time span:last-child");
 
-        document.getElementById("back").addEventListener("click", () => { if (this.index) this.index--; this.update(); });
-        document.getElementById("next").addEventListener("click", () => { if (this.index < 19) this.index++; this.update(); });
+        document.getElementById("back").addEventListener("click", () => {
+            if (this.interval) clearInterval(this.interval);
+            if (this.index) this.index--;
+            this.update();
+        });
+        document.getElementById("next").addEventListener("click", () => {
+            if (this.interval) clearInterval(this.interval);
+            if (this.index < 19) this.index++;
+            this.update();
+        });
+        document.getElementById("play").addEventListener("click", () => {
+            this.interval = setInterval(() => {
+                this.index = this.index === 19 ? 0 : this.index + 1;
+                this.update();
+            }, 200);
+        });
+        document.getElementById("pause").addEventListener("click", () => {
+            if (this.interval) clearInterval(this.interval);
+        });
     }
     
     update() {
