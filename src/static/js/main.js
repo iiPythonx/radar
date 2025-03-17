@@ -36,7 +36,7 @@ class Radar {
         this.index = 19;
         
         // Setup NOAA map options
-        this.noaa_url = "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows?";
+        this.noaa_url = "/gis/radar";
         this.noaa_opts = {
             minZoom: 2,
             maxZoom: 10,
