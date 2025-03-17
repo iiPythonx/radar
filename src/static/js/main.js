@@ -28,7 +28,7 @@ class Radar {
                 minZoom: 2,
                 maxZoom: 10,
                 attribution: `&copy; <a href = "https://www.stadiamaps.com/" target = "_blank">Stadia Maps</a>, <a href = "https://openmaptiles.org/" target = "_blank">OpenMapTiles</a>, <a href = "https://www.openstreetmap.org/copyright" target = "_blank">OSM</a>`,
-                ext: "png"
+                ext: "jpg"
             }
         ).addTo(this.map);
 
@@ -38,6 +38,11 @@ class Radar {
         // Setup NOAA map options
         this.noaa_url = "/gis/radar";
         this.noaa_opts = {
+            bounds: L.latLngBounds(
+                L.latLng(10.0, -170.0),
+                L.latLng(83.0, -50.0)
+            ),
+            tileSize: 512,
             minZoom: 2,
             maxZoom: 10,
             opacity: 0,
@@ -92,6 +97,7 @@ class Radar {
         // Show current layer
         for (const layer of this.layers) layer.setOpacity(0);
         this.layers[this.index].setOpacity(.5);
+        if (!this.map.hasLayer(this.layers[this.index])) this.map.addLayer(this.layers[this.index]);
     }
 
     async fetch() {
@@ -106,7 +112,6 @@ class Radar {
         for (const time of this.times) {
             const layer = L.tileLayer.wms(this.noaa_url, this.noaa_opts);
             layer.setParams({ time });
-            this.map.addLayer(layer);
             this.layers.push(layer);
         }
 
