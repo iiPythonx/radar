@@ -32,27 +32,10 @@ class Radar {
             }
         ).addTo(this.map);
 
+        this.map.on("moveend", () => this.wms_update());
+
         // Set initial index, 19 = end (.length = 20) since I'm avoiding .at()
         this.index = 19;
-        
-        // Setup NOAA map options
-        this.noaa_url = "/gis/radar";
-        this.noaa_opts = {
-            bounds: L.latLngBounds(
-                L.latLng(10.0, -170.0),
-                L.latLng(83.0, -50.0)
-            ),
-            tileSize: 512,
-            minZoom: 2,
-            maxZoom: 10,
-            opacity: 0,
-            layers: "conus_bref_qcd",
-            format: "image/png",
-            transparent: true,
-            version: "1.1.1",
-            crs: L.CRS.EPSG3857,
-            attribution: `&copy; <a href = "https://www.noaa.gov/" target = "_blank">NOAA</a>, <a href = "https://www.weather.gov/" target = "_blank">NWS</a>`
-        }
 
        // Make initial radar request
        this.fetch();
@@ -88,6 +71,53 @@ class Radar {
         });
     }
     
+    bbox() {
+        const bounds = this.map.getBounds();
+        const sw = this.map.options.crs.project(bounds.getSouthWest());
+        const ne = this.map.options.crs.project(bounds.getNorthEast());
+        return [sw.x, sw.y, ne.x, ne.y].join(",");
+    }
+
+    url(time) {
+        const size = this.map.getSize();
+        return `/gis/radar?` +
+               `service=WMS&request=GetMap&version=1.1.1` +
+               `&layers=conus_bref_qcd` +
+               `&styles=` +
+               `&format=image/png&transparent=true` +
+               `&crs=EPSG:3857` +
+               `&bbox=${this.bbox()}` +
+               `&width=${size.x}&height=${size.y}` +
+               `&time=${time}`;
+    }
+
+    add_layer(time) {
+        const bounds = this.map.getBounds();
+
+        // Initialize image
+        const overlay = L.imageOverlay(
+            this.url(time),
+            bounds,
+            {
+                opacity: 0,
+                attribution: `&copy; <a href = "https://www.noaa.gov/" target = "_blank">NOAA</a>, <a href = "https://www.weather.gov/" target = "_blank">NWS</a>`
+            }
+        );
+
+        // Recalculate map bounds on image load (ie when its changed)
+        overlay.on("load", () => {
+            overlay.setBounds(this.map.getBounds());
+        });
+
+        // Pushing
+        overlay.addTo(this.map);
+        return overlay;
+    }
+
+    wms_update() {
+        for (const layer of [...this.layers].reverse()) layer.setUrl(this.url(layer.time));  // Relculate the URL given time
+    }
+
     update() {
         const obj = new Date(this.times[this.index]);
         this.time.innerText = obj.toLocaleTimeString([], { hour12: false })
@@ -97,7 +127,6 @@ class Radar {
         // Show current layer
         for (const layer of this.layers) layer.setOpacity(0);
         this.layers[this.index].setOpacity(.5);
-        if (!this.map.hasLayer(this.layers[this.index])) this.map.addLayer(this.layers[this.index]);
     }
 
     async fetch() {
@@ -110,8 +139,8 @@ class Radar {
 
         this.layers = [];
         for (const time of this.times) {
-            const layer = L.tileLayer.wms(this.noaa_url, this.noaa_opts);
-            layer.setParams({ time });
+            const layer = this.add_layer(time);
+            layer.time = time;
             this.layers.push(layer);
         }
 
